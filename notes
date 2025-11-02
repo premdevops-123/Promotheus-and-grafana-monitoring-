@@ -1,0 +1,141 @@
+
+prometheus:
+Prometheus is an open-source monitoring and alerting toolkit primarily designed for reliability and scalability in monitoring large-scale systems. Originally developed by SoundCloud, it is now a part of the Cloud Native Computing Foundation (CNCF).
+Press enter or click to view image in full size
+
+Key Features of Prometheus:
+Time-Series Database: Prometheus collects metrics as time series data, meaning it stores information as streams of timestamped data. For example, CPU usage over time or HTTP requests per second.
+Powerful Query Language (PromQL): Prometheus uses a flexible query language called PromQL, which allows you to query and manipulate time-series data in real time.
+Alerting: Prometheus has a built-in alerting system that lets you define alert rules. When a rule is violated, it can send alerts through various alerting services like Alertmanager, Slack, or email.
+Pull-Based Model: Prometheus uses a “pull” model, where it regularly scrapes metrics from configured endpoints. This model works well for ephemeral or dynamic services often seen in containerized environments.
+Built for Microservices: Prometheus is commonly used in microservices and Kubernetes environments due to its robustness and the compatibility with Kubernetes’ service discovery.
+Use Cases for Prometheus:
+Monitoring infrastructure performance and resource usage.
+Tracking and alerting on metrics for cloud-native applications.
+Observing metrics in a containerized environment (e.g., Kubernetes).
+Grafana:
+Grafana is an open-source visualization and analytics platform that enables you to query, visualize, and explore data from a wide range of data sources, including Prometheus. Grafana is often used to create customizable dashboards and alerts.
+Press enter or click to view image in full size
+
+Key Features of Grafana:
+Visualizations: Grafana provides a rich set of visualizations (graphs, tables, heatmaps, etc.), making it easy to build customized dashboards for data exploration and monitoring.
+Flexible Data Source Support: Grafana can connect to a variety of data sources, such as Prometheus, InfluxDB, MySQL, and many others, enabling multi-source data integration in a single dashboard.
+Alerting: Grafana also supports alerting on visualized metrics. It can send alerts to services like Slack, PagerDuty, and others when thresholds are crossed.
+User Management and Permissions: Grafana includes role-based access control, allowing organizations to manage access and permissions based on team roles.
+Dashboard Sharing: Grafana dashboards can be shared publicly or privately, making it easy for teams to collaborate or show stakeholders a real-time view of system performance.
+Use Cases for Grafana:
+Creating and managing customized dashboards for real-time performance monitoring.
+Visualizing and analyzing time-series data from Prometheus and other sources.
+Setting up centralized alert management with multi-source data.
+Introduction:
+In today’s cloud-native world, monitoring and observability are crucial for maintaining application health and performance. In this blog post, we’ll walk you through the process of installing and setting up Prometheus and Grafana on a Google Kubernetes Engine (GKE) cluster. By the end, you will have a fully operational monitoring stack that provides insightful metrics and visualizations of your Kubernetes resources.
+Prerequisites:
+Before we dive into the installation, make sure you have the following:
+
+Google Cloud Account: Create an account if you don’t have one.
+GKE Cluster: A running GKE cluster. You can create one using the Google Cloud Console or via the command line.
+kubectl: The Kubernetes command-line tool installed and configured to communicate with your GKE cluster.
+Helm: A package manager for Kubernetes. Make sure it’s installed locally.
+Step 1: Set Up Your GKE Cluster
+Press enter or click to view image in full size
+
+Step 2: Configure kubectl
+Make sure your kubectl is configured to use your GKE cluster:
+Press enter or click to view image in full size
+
+Press enter or click to view image in full size
+
+Step 3: Install Prometheus and Grafana Using Helm
+Add the Helm Repositories:
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+helm repo ls
+Press enter or click to view image in full size
+
+2. Create a Namespace for Prometheus and Grafana:
+
+kubectl create namespace monitoring
+Press enter or click to view image in full size
+
+3. Install Prometheus using the Helm chart on monitoring namespace:
+
+helm install prometheus prometheus-community/prometheus -n monitoring
+Get vijay giduthuri’s stories in your inbox
+Join Medium for free to get updates from this writer.
+
+Enter your email
+Subscribe
+4. Install Grafana using the Helm chart on monitoring namespace:
+
+helm install grafana grafana/grafana -n monitoring
+Display prometheus and grafana all the Pods, Deployments, Services, Secrets.
+Press enter or click to view image in full size
+
+Step 4: Access Prometheus & Grafana Dashboard
+Access Grafana Dashboard:
+To Access Grafana Dashboard change grafana service type from ClusterIP to LoadBalancer
+kubectl get svc -n monitoring
+kubectl edit svc grafana -n monitoring
+Press enter or click to view image in full size
+
+Now a Network Load Balancer will be created on Google cloud access with IP:Port to access grafana dashboard.
+Press enter or click to view image in full size
+
+# To Access Grafana Dashboard
+http://34.46.92.58:80 
+Press enter or click to view image in full size
+
+Get the Grafana admin password: The initial password is stored in a kubernetes secrets.
+kubectl get secrets -n monitoring
+Press enter or click to view image in full size
+
+kubectl edit secret grafana -n monitoring
+Press enter or click to view image in full size
+
+echo Y3Z3WXlQUkRoWWJZODlXWXJNRzBSamNzNG5EaUVwWDQ5VmtBd3ZYYQ== | base64 --decode
+Press enter or click to view image in full size
+
+Press enter or click to view image in full size
+
+2. Access Prometheus Dashboard:
+
+To Access Prometheus Dashboard change grafana service type from ClusterIP to LoadBalancer
+kubectl get svc -n monitoring
+kubectl edit svc prometheus-grafana -n monitoring
+Press enter or click to view image in full size
+
+Now a Network Load Balancer will be created on Google cloud access with IP:Port to access Prometheus dashboard.
+Press enter or click to view image in full size
+
+# To Access Prometheus Dashboard
+http://104.197.214.104:80
+Press enter or click to view image in full size
+
+Step 5: Configure Prometheus Data Source in Grafana
+In the Grafana dashboard, go to Configuration > Data Sources.
+Add a new data source:
+Type: Prometheus
+Press enter or click to view image in full size
+
+URL: http://prometheus-server.monitoring.svc.cluster.local:80
+Press enter or click to view image in full size
+
+Save & Test.
+Press enter or click to view image in full size
+
+Step 6: Import Dashboards
+Go to Grafana > Dashboards > Import.
+Use existing dashboard IDs or JSON files to import recommended dashboards for Kubernetes monitoring. Some popular IDs are:
+315: Kubernetes cluster monitoring (Prometheus).
+Press enter or click to view image in full size
+
+6417: Kubernetes monitoring (API server, kubelet, etcd, etc.).
+
+
+1860: Node Exporter Full
+Press enter or click to view image in full size
+
+Step 6: Verify Monitoring Setup
+After setting up, explore the Grafana dashboards to monitor various GKE metrics such as node health, pod metrics, and Kubernetes API server metrics.
+You should now have a fully functioning Prometheus and Grafana setup for monitoring your GKE cluster!
